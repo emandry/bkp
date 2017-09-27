@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.12.2">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.28.0">
+      <projectUrl>https://github.com/emandry/java-demo/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.40">
+    <script>
+node {
+    def server = Artifactory.server &apos;demo-artifactory&apos;
+    def rtGradle = Artifactory.newGradleBuild()
+    def buildInfo
+  
+    stage (&apos;Clone&apos;) {
+        git url: &apos;https://github.com/emandry/java-demo.git&apos;
+    }
+
+    stage (&apos;Artifactory configuration&apos;) {
+        rtGradle.tool = &apos;GRADLE_TOOL&apos; // Tool name from Jenkins configuration
+        rtGradle.deployer repo: &apos;demo-repo&apos;, server: server
+        rtGradle.resolver repo: &apos;jcenter&apos;, server: server
+    }
+    
+    stage(&apos;build&apos;) {
+        buildInfo = rtGradle.run rootDir: &quot;./&quot;, buildFile: &apos;build.gradle&apos;, tasks: &apos;clean artifactoryPublish&apos;
+    }
+    
+    stage(&apos;subir a Artifactory&apos;) {
+        def uploadSpec = &quot;&quot;&quot;{
+          &quot;files&quot;: [
+            {
+              &quot;pattern&quot;: &quot;build/*.war&quot;,
+              &quot;target&quot;: &quot;demo-repo/&quot;
+            }
+         ]
+        }&quot;&quot;&quot;
+        server.upload(uploadSpec)
+    }
+
+ }</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

@@ -7,8 +7,8 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition plugin="extensible-choice-parameter@1.4.1">
-          <name>test</name>
-          <description>test</description>
+          <name>prueba</name>
+          <description>Prueba</description>
           <editable>false</editable>
           <choiceListProvider class="jp.ikedam.jenkins.plugins.extensible_choice_parameter.SystemGroovyChoiceListProvider">
             <groovyScript plugin="script-security@1.34">
